@@ -2,23 +2,11 @@
   (:use oskarkv.utils)
   (:require [clojure.string :as str]))
 
-(defn sign [x]
-  (cond (pos? x) 1
-        (neg? x) -1
-        :else 0))
-
 (defn read-raw-input [n]
   (slurp (str "input/" n ".txt")))
 
 (defn read-input [n]
   (str/split (read-raw-input n) #"\n"))
-
-(defn parse-int
-  ([x] (Integer/parseInt x))
-  ([x radix] (Integer/parseInt x radix)))
-
-(defn transpose [m]
-  (vec (apply zip m)))
 
 (defn num-increases [window-size values]
   (->>$ (partition window-size 1 values)
@@ -28,7 +16,7 @@
     count))
 
 (defn solve-1 []
-  (->> (map parse-int (read-input 1))
+  (->> (map parse-long (read-input 1))
     (num-increases 3)))
 
 (defn eventual-pos [coll]
@@ -49,16 +37,16 @@
 (defn solve-2 []
   (->>$ (read-input 2)
     (map #(str/split % #"\s"))
-    (map (juxt (comp keyword first) (comp parse-int lastv)))
+    (map (juxt (comp keyword first) (comp parse-long lastv)))
     eventual-pos-with-aim
     ((juxt :forward :depth))
     (apply *)))
 
 (defn to-digits [bin-string]
-  (mapv (comp parse-int str) bin-string))
+  (mapv (comp parse-long str) bin-string))
 
 (defn digits-to-decimal [digits]
-  (parse-int (apply str digits) 2))
+  (parse-long (apply str digits) 2))
 
 (defn most-common [coll]
   (if (apply >= (map #(count (filter #{%} coll)) [1 0])) 1 0))
@@ -90,7 +78,7 @@
 (defn winner? [drawn board]
   (let [rows (partition 5 board)
         cols (transpose rows)]
-    (when (some identity (map #(every? (set drawn) %) (concat rows cols)))
+    (when (some-in (map #(every? (set drawn) %) (concat rows cols)))
       [drawn board])))
 
 (defn winners [drawn boards]
@@ -105,9 +93,9 @@
 
 (defn solve-4 []
   (let [[drawn boards] (str/split (read-raw-input 4) #"\n" 2)
-        drawn (map parse-int (str/split drawn #","))
+        drawn (map parse-long (str/split drawn #","))
         boards (->> (str/split (str/trim boards) #"\s+")
-                 (map parse-int)
+                 (map parse-long)
                  (partition 25))]
     (map score ((juxt first last) (winners drawn boards)))))
 
@@ -129,6 +117,6 @@
 (defn solve-5 []
   (->>$ (read-input 5)
     (map #(str/split % #"(,| -> )"))
-    (map #(map parse-int %))
+    (map #(map parse-long %))
     mark-lines
     count-intersections))
