@@ -5,7 +5,12 @@
 (defn read-input [n]
   (str/split (slurp (str "input/" n ".txt")) #"\n"))
 
-(def parse-int #(Integer/parseInt %))
+(defn parse-int
+  ([x] (Integer/parseInt x))
+  ([x radix] (Integer/parseInt x radix)))
+
+(defn transpose [m]
+  (vec (apply zip m)))
 
 (defn num-increases [window-size values]
   (->>$ (partition window-size 1 values)
@@ -40,3 +45,36 @@
     eventual-pos-with-aim
     ((juxt :forward :depth))
     (apply *)))
+
+(defn to-digits [bin-string]
+  (mapv (comp parse-int str) bin-string))
+
+(defn digits-to-decimal [digits]
+  (parse-int (apply str digits) 2))
+
+(defn most-common [coll]
+  (if (apply >= (map #(count (filter #{%} coll)) [1 0])) 1 0))
+
+(def least-common (comp #(- 1 %) most-common))
+
+(defn find-by-criterion [crit]
+  (fn f [coll]
+    (cond (== 1 (count coll)) (first coll)
+          (and (seq coll) (ffirst coll))
+          (let [x (crit (map first coll))]
+            (cons x (f (map rest (filter (comp #{x} first) coll))))))))
+
+(defmacro day-3-solver {:style/indent 1} [name & body]
+  `(defn ~name []
+     (->>$ (read-input 3)
+       (map to-digits)
+       ~@body
+       (map digits-to-decimal)
+       (apply *))))
+
+(day-3-solver solve-3-1
+  transpose
+  ((juxt #(map most-common $) #(map least-common $))))
+
+(day-3-solver solve-3-2
+  ((apply juxt (map find-by-criterion [most-common least-common]))))
