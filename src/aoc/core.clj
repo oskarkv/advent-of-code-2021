@@ -2,6 +2,11 @@
   (:use oskarkv.utils)
   (:require [clojure.string :as str]))
 
+(defn sign [x]
+  (cond (pos? x) 1
+        (neg? x) -1
+        :else 0))
+
 (defn read-raw-input [n]
   (slurp (str "input/" n ".txt")))
 
@@ -105,3 +110,25 @@
                  (map parse-int)
                  (partition 25))]
     (map score ((juxt first last) (winners drawn boards)))))
+
+(defn points [[x y x2 y2]]
+  (if (= [x y] [x2 y2])
+    [[x y]]
+    (let [[dx dy] (map sign (map - [x2 y2] [x y]))]
+      (cons [x y] (points [(+ x dx) (+ y dy) x2 y2])))))
+
+(defn mark-lines [lines]
+  (reduce #(merge-with + % (zipmap (points %2) (repeat 1))) {} lines))
+
+(defn straight? [[x y x2 y2]]
+  (or (== x x2) (== y y2)))
+
+(defn count-intersections [m]
+  (count (filter #(> % 1) (vals m))))
+
+(defn solve-5 []
+  (->>$ (read-input 5)
+    (map #(str/split % #"(,| -> )"))
+    (map #(map parse-int %))
+    mark-lines
+    count-intersections))
