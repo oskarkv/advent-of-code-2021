@@ -2,6 +2,10 @@
   (:use oskarkv.utils)
   (:require [clojure.string :as str]))
 
+(defn parse-int
+  ([x] (Integer/parseInt x))
+  ([x radix] (Integer/parseInt x radix)))
+
 (defn read-raw-input [n]
   (str/trim (slurp (str "input/" n ".txt"))))
 
@@ -16,7 +20,7 @@
     count))
 
 (defn solve-1 []
-  (->> (map parse-long (read-input 1))
+  (->> (map parse-int (read-input 1))
     (num-increases 3)))
 
 (defn eventual-pos [coll]
@@ -37,16 +41,16 @@
 (defn solve-2 []
   (->>$ (read-input 2)
     (map #(str/split % #"\s"))
-    (map (juxt (comp keyword first) (comp parse-long lastv)))
+    (map (juxt (comp keyword first) (comp parse-int lastv)))
     eventual-pos-with-aim
     ((juxt :forward :depth))
     (apply *)))
 
 (defn to-digits [bin-string]
-  (mapv (comp parse-long str) bin-string))
+  (mapv (comp parse-int str) bin-string))
 
 (defn digits-to-decimal [digits]
-  (parse-long (apply str digits) 2))
+  (parse-int (apply str digits) 2))
 
 (defn most-common [coll]
   (if (apply >= (map #(count (filter #{%} coll)) [1 0])) 1 0))
@@ -93,9 +97,9 @@
 
 (defn solve-4 []
   (let [[drawn boards] (str/split (read-raw-input 4) #"\n" 2)
-        drawn (map parse-long (str/split drawn #","))
+        drawn (map parse-int (str/split drawn #","))
         boards (->> (str/split (str/trim boards) #"\s+")
-                 (map parse-long)
+                 (map parse-int)
                  (partition 25))]
     (map score ((juxt first last) (winners drawn boards)))))
 
@@ -117,7 +121,7 @@
 (defn solve-5 []
   (->>$ (read-input 5)
     (map #(str/split % #"(,| -> )"))
-    (map #(map parse-long %))
+    (map #(map parse-int %))
     mark-lines
     count-intersections))
 
@@ -132,7 +136,7 @@
 (defn solve-6 []
   (->>$ (read-raw-input 6)
     (str/split $ #",")
-    (map parse-long)
+    (map parse-int)
     (group-by identity)
     (fmap count)
     (run-simulation $ 256)))
