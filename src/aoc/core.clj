@@ -3,7 +3,7 @@
   (:require [clojure.string :as str]))
 
 (defn read-raw-input [n]
-  (slurp (str "input/" n ".txt")))
+  (str/trim (slurp (str "input/" n ".txt"))))
 
 (defn read-input [n]
   (str/split (read-raw-input n) #"\n"))
@@ -120,3 +120,19 @@
     (map #(map parse-long %))
     mark-lines
     count-intersections))
+
+(defn run-simulation [m days]
+  (if (zero? days)
+    (sum (vals m))
+    (recur (->>$ (move m 0 9)
+             (assoc $ 7 (+some ($ 9) ($ 7)))
+             (kmap dec))
+           (dec days))))
+
+(defn solve-6 []
+  (->>$ (read-raw-input 6)
+    (str/split $ #",")
+    (map parse-long)
+    (group-by identity)
+    (fmap count)
+    (run-simulation $ 256)))
