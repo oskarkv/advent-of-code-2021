@@ -3,5 +3,5 @@
         org.clojure/math.combinatorics {:mvn/version "0.1.5"}
         com.rpl/specter {:mvn/version "1.1.2"}
         io.github.oskarkv/clojure-utils
-        {:git/sha "4b4ac71422352346baba0cfe2f892a6d97d2e918"}}
+        {:git/sha "044bd15e6c4ec8d60af11ebf17e0ce9d849b82e0"}}
  :paths ["src"]}

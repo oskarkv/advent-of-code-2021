@@ -3,16 +3,6 @@
   (:require [clojure.string :as str]
             [clojure.java.math :as math]))
 
-(defn floor [x]
-  (long (math/floor x)))
-
-(defn ceil [x]
-  (long (math/ceil x)))
-
-(defn parse-int
-  ([x] (Integer/parseInt x))
-  ([x radix] (Integer/parseInt x radix)))
-
 (defn read-raw-input [n]
   (str/trim (slurp (str "input/" n ".txt"))))
 
