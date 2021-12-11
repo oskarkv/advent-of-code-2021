@@ -154,3 +154,27 @@
     (str/split $ #",")
     (map parse-int)
     ((juxt fuel-1 fuel-2))))
+
+(defn count-1478 [coll]
+  (let [cn (fn [v] (count (filter #(#{2 3 4 7} (count %)) (secondv v))))]
+    (reduce + (map cn coll))))
+
+(defn deduce-digits [v]
+  (let [[hints output] (map #(map set %) v)
+        g (group-by count hints)
+        fg #(first (g %))
+        p (fn [[y l] x] (= l (count (intersection y x))))
+        f (fn [x]
+            (let [n (count x)]
+              (cond
+                (#{2 3 4 7} n) (condp = n 2 1 3 7 4 4 7 8)
+                (= n 5) (condp p x [(fg 2) 2] 3 [(fg 4) 3] 5 2)
+                (= n 6) (condp p x [(fg 4) 4] 9 [(fg 2) 2] 0 6))))]
+    (parse-long (map-str f output))))
+
+(defn solve-8 []
+  (->> (read-input 8)
+    (map #(str/split % #" \| "))
+    (map (fn [v] (mapv #(str/split % #" ") v)))
+    (map deduce-digits)
+    (reduce +)))
