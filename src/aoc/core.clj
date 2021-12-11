@@ -1,6 +1,13 @@
 (ns aoc.core
   (:use oskarkv.utils)
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.java.math :as math]))
+
+(defn floor [x]
+  (long (math/floor x)))
+
+(defn ceil [x]
+  (long (math/ceil x)))
 
 (defn parse-int
   ([x] (Integer/parseInt x))
@@ -140,3 +147,20 @@
     (group-by identity)
     (fmap count)
     (run-simulation $ 256)))
+
+(defn fuel-1 [coll]
+  (let [s (sortv coll)
+        n (count coll)
+        x (s (int (/ n 2)))]
+    (reduce + (map #(abs (- x %)) coll))))
+
+(defn fuel-2 [coll]
+  (letfn [(cost [dist] (/ (* dist (inc dist)) 2))
+          (total-cost [x] (reduce + (map #(cost (abs (- x %))) coll)))]
+    (apply min (map total-cost ((juxt floor ceil) (apply avg coll))))))
+
+(defn solve-7 []
+  (->>$ (read-raw-input 7)
+    (str/split $ #",")
+    (map parse-int)
+    ((juxt fuel-1 fuel-2))))
