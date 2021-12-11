@@ -142,11 +142,11 @@
   (let [s (sortv coll)
         n (count coll)
         x (s (int (/ n 2)))]
-    (reduce + (map #(abs (- x %)) coll))))
+    (sum (map #(abs (- x %)) coll))))
 
 (defn fuel-2 [coll]
   (letfn [(cost [dist] (/ (* dist (inc dist)) 2))
-          (total-cost [x] (reduce + (map #(cost (abs (- x %))) coll)))]
+          (total-cost [x] (sum (map #(cost (abs (- x %))) coll)))]
     (apply min (map total-cost ((juxt floor ceil) (apply avg coll))))))
 
 (defn solve-7 []
@@ -157,7 +157,7 @@
 
 (defn count-1478 [coll]
   (let [cn (fn [v] (count (filter #(#{2 3 4 7} (count %)) (secondv v))))]
-    (reduce + (map cn coll))))
+    (sum (map cn coll))))
 
 (defn deduce-digits [v]
   (let [[hints output] (map #(map set %) v)
@@ -177,7 +177,7 @@
     (map #(str/split % #" \| "))
     (map (fn [v] (mapv #(str/split % #" ") v)))
     (map deduce-digits)
-    (reduce +)))
+    sum))
 
 (let [matrix (->> (read-input 9)
                (mapv #(mapv (comp parse-long str) %)))
@@ -197,7 +197,7 @@
                                     (get-in matrix coord)))
                        (neighbor-coords x y)))))
   (defn solve-9-1 []
-    (->> (low-points matrix) (map second) (map inc) (reduce +)))
+    (->> (low-points matrix) (map second) (map inc) sum))
   (defn solve-9-2 []
     (->> (low-points matrix)
       (map first)
