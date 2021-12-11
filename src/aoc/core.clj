@@ -178,3 +178,31 @@
     (map (fn [v] (mapv #(str/split % #" ") v)))
     (map deduce-digits)
     (reduce +)))
+
+(let [matrix (->> (read-input 9)
+               (mapv #(mapv (comp parse-long str) %)))
+      neighbor-coords (fn [x y] (map #(mapv + % %2)
+                                     (cycle [[y x]])
+                                     [[1 0] [-1 0] [0 1] [0 -1]]))
+      neighbors (fn [x y] (keep #(get-in matrix %) (neighbor-coords x y)))]
+  (defn low-points [matrix]
+    (filter some? (for [y (range (count matrix))
+                        x (range (count (first matrix)))
+                        :let [n (get-in matrix [y x])]]
+                    (when (every? #(> % n) (neighbors x y))
+                      [[y x] n]))))
+  (defn basin [matrix low]
+    (bfs low (fn [[y x]]
+               (filter (fn [coord] ((every-pred some? #(not= 9 %))
+                                    (get-in matrix coord)))
+                       (neighbor-coords x y)))))
+  (defn solve-9-1 []
+    (->> (low-points matrix) (map second) (map inc) (reduce +)))
+  (defn solve-9-2 []
+    (->> (low-points matrix)
+      (map first)
+      (map #(basin matrix %))
+      (map count)
+      (sort >)
+      (take 3)
+      (reduce *))))
