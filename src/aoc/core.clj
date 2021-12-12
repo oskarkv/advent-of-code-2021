@@ -206,3 +206,39 @@
       (sort >)
       (take 3)
       (reduce *))))
+
+(letfn [(parse [line]
+          (let [line (vec line)
+                closing? (set "])}>")
+                pairs (apply hash-map "()[]<>{}")]
+            (loop [stack '() index 0]
+              (if-let [x (get line index)]
+                (if (closing? x)
+                  (if (= x (first stack))
+                    (recur (rest stack) (inc index))
+                    x)
+                  (recur (cons (pairs x) stack) (inc index)))
+                stack))))]
+  (defn first-bad [line]
+    (cond->$ (parse line)
+      (not (char? $)) (do nil)))
+  (defn completing-score [line]
+    (let [points (zipmap ")]}>" (range 1 5))]
+      (reduce (fn [total x]
+                (+ (* total 5) (points x)))
+              0
+              (parse line)))))
+
+(defn solve-10-1 []
+  (let [score (zipmap ")]}>" [3 57 1197 25137])]
+    (->> (read-input 10)
+      (keep first-bad)
+      (map score)
+      sum)))
+
+(defn solve-10-2 []
+  (->>$ (read-input 10)
+    (remove first-bad)
+    (map completing-score)
+    sortv
+    ($ (floor (/ (count $) 2)))))
