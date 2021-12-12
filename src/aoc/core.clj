@@ -9,6 +9,9 @@
 (defn read-input [n]
   (str/split (read-raw-input n) #"\n"))
 
+(defn matrixify [lines]
+  (mapv #(mapv (comp parse-long str) %) lines))
+
 (defn num-increases [window-size values]
   (->>$ (partition window-size 1 values)
     (map sum)
@@ -179,8 +182,7 @@
     (map deduce-digits)
     sum))
 
-(let [matrix (->> (read-input 9)
-               (mapv #(mapv (comp parse-long str) %)))
+(let [matrix (matrixify (read-input 9))
       neighbor-coords (fn [x y] (map #(mapv + % %2)
                                      (cycle [[y x]])
                                      [[1 0] [-1 0] [0 1] [0 -1]]))
@@ -242,3 +244,34 @@
     (map completing-score)
     sortv
     ($ (floor (/ (count $) 2)))))
+
+(letfn [(coords [[y x]]
+          (for [dx (range -1 2)
+                dy (range -1 2)
+                :when (not= 0 dx dy)]
+            [(+ y dy) (+ x dx)]))
+        (find-9s [matrix]
+          (set (for [y (range 10) x (range 10)
+                     :when (= 9 (get-in matrix [y x]))]
+                 [y x])))
+        (step [m]
+          (loop [matrix (mapv #(mapv inc %) m) gonna (find-9s m) has #{}]
+            (if-let [p (first gonna)]
+              (let [cs (filter #(get-in matrix %) (coords p))
+                    nm (reduce (fn [m p] (update-in m p inc)) matrix cs)]
+                (recur
+                 nm
+                 (union (disj gonna p) (filter #(= 10 (get-in nm %)) cs))
+                 (conj has p)))
+              [(mapv #(mapv (fn [x] (if (> x 9) 0 x)) %) matrix) (count has)])))
+        (run [matrix]
+          (loop [matrix matrix c 0 n 0]
+            (if (< n 100000)
+              (let [[m fs] (step matrix)]
+                (if (not= 100 fs)
+                  (recur m (+ c fs) (inc n))
+                  (inc n))))))]
+  (defn solve-11 []
+    (->>$ (read-input 11)
+      matrixify
+      run)))
